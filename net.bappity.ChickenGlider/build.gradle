@@ -1,0 +1,33 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '7.1.0'
+}
+
+group 'net.bappity'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+    }
+}
+
+dependencies {
+    implementation "org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT"
+    testImplementation 'junit:junit:4.13.2'
+}
+
+shadowJar {
+    archiveClassifier.set('')
+    relocate 'org.bukkit', 'net.bappity.bukkit'
+    relocate 'net.md_5.bungee', 'net.bappity.bungee'
+    relocate 'org.spigotmc', 'net.bappity.spigot'
+}
+
+application {
+    mainClass = 'net.bappity.ChickenGrabber'
+}
