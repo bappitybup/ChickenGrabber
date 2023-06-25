@@ -21,6 +21,7 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -92,8 +93,7 @@ public class ChickenGrabEvents implements Listener {
         player.addPassenger(chicken);
 
         // Play mount sound
-        player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_GENERIC, SoundCategory.PLAYERS, 1.0f,
-                1.0f);
+        player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_GENERIC, SoundCategory.PLAYERS, 1.0f, 1.0f);
     }
 
     @EventHandler
@@ -109,7 +109,7 @@ public class ChickenGrabEvents implements Listener {
                     Player player = (Player) passenger;
 
                     // Dismount the chicken
-                    dismountAllChickens(player);
+                    dismountAllChickens(player, true);
 
                     // Remove the Glide Feather
                     ItemStack mainHandItem = player.getInventory().getItemInMainHand();
@@ -197,7 +197,7 @@ public class ChickenGrabEvents implements Listener {
         if (itemHeld != null && itemHeld.getType() == Material.FEATHER && itemHeld.getItemMeta().hasDisplayName()
                 && itemHeld.getItemMeta().getDisplayName().equals(ChatColor.AQUA + "Glide Feather")) {
             itemHeld.setAmount(0);
-            dismountAllChickens(player);
+            dismountAllChickens(player, false);
             featherDetected = true;
             player.removePotionEffect(PotionEffectType.SLOW_FALLING);
         }
@@ -205,13 +205,19 @@ public class ChickenGrabEvents implements Listener {
         return featherDetected;
     }
 
-    private void dismountAllChickens(Player player) {
+    private void dismountAllChickens(Player player, boolean shouldPlayDamageSound) {
         for (Entity passenger : player.getPassengers()) {
             player.removePassenger(passenger);
 
-            // Play the dismount sound
-            player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_GENERIC, SoundCategory.PLAYERS, 1.0f,
-                    1.0f);
+            if (shouldPlayDamageSound) {
+                // Play the damage dismount sound
+                player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_HURT, SoundCategory.PLAYERS, 1.0f,
+                        1.0f);
+            } else {
+                // Play the dismount sound
+                player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_GENERIC, SoundCategory.PLAYERS, 1.0f,
+                        1.0f);
+            }
         }
     }
 
@@ -249,10 +255,15 @@ public class ChickenGrabEvents implements Listener {
             return;
         }
 
+        if (vehicle instanceof Player) {
+            event.setDamage(0);
+            event.setCancelled(true);
+        }
+
         Player player = (Player) vehicle;
 
         // Dismount the chicken
-        dismountAllChickens(player);
+        dismountAllChickens(player, true);
 
         // Remove the Glide Feather
         ItemStack mainHandItem = player.getInventory().getItemInMainHand();
