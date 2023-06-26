@@ -90,6 +90,7 @@ public class ChickenGrabEvents implements Listener {
             }
         }
 
+        chicken.setAI(false);
         player.addPassenger(chicken);
 
         // Play mount sound
@@ -209,6 +210,11 @@ public class ChickenGrabEvents implements Listener {
         for (Entity passenger : player.getPassengers()) {
             player.removePassenger(passenger);
 
+            if (passenger instanceof Chicken) {
+                Chicken chicken = (Chicken) passenger;
+                chicken.setAI(true);
+            }
+
             if (shouldPlayDamageSound) {
                 // Play the damage dismount sound
                 player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_HURT, SoundCategory.PLAYERS, 1.0f,
@@ -229,6 +235,8 @@ public class ChickenGrabEvents implements Listener {
         if (chickenOnHead.isPresent()) {
             Chicken chicken = chickenOnHead.get();
 
+            updateChickenYawToMatchPlayer(player, chicken);
+
             // Apply Slow Falling effect if the player has a chicken on their head
             applySlowFallingEffect(player);
 
@@ -240,6 +248,34 @@ public class ChickenGrabEvents implements Listener {
             // Remove Slow Falling effect if the player doesn't have a chicken on their head
             player.removePotionEffect(PotionEffectType.SLOW_FALLING);
         }
+    }
+
+    private void updateChickenYawToMatchPlayer(Player player, Chicken chicken) {
+        Location chickenLocation = chicken.getLocation();
+        chickenLocation.setYaw(player.getLocation().getYaw());
+
+        // Detach the chicken from the player's head
+        player.removePassenger(chicken);
+
+        // Teleport the chicken and update its yaw
+        chicken.teleport(chickenLocation);
+
+        // Re-attach the chicken on the player's head, forcing it to be added to the
+        // stack
+        forceAddPassenger(player, chicken);
+    }
+
+    private void forceAddPassenger(Entity carrier, Entity newPassenger) {
+        // If the carrier doesn't have any passengers, simply add the new passenger
+        if (carrier.getPassengers().size() == 0) {
+            carrier.addPassenger(newPassenger);
+            return;
+        }
+
+        // If the carrier has a passenger, recursively add the new passenger to the top
+        // of the stack
+        Entity passenger = carrier.getPassengers().get(0);
+        forceAddPassenger(passenger, newPassenger);
     }
 
     @EventHandler
