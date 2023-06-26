@@ -21,7 +21,6 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -103,20 +102,18 @@ public class ChickenGrabEvents implements Listener {
 
         if (deadEntity instanceof Chicken) {
             Chicken chicken = (Chicken) deadEntity;
-            List<Entity> passengers = chicken.getPassengers();
+            Entity vehicle = chicken.getVehicle();
 
-            for (Entity passenger : passengers) {
-                if (passenger instanceof Player) {
-                    Player player = (Player) passenger;
+            if (vehicle instanceof Player) {
+                Player player = (Player) vehicle;
 
-                    // Dismount the chicken
-                    dismountAllChickens(player, true);
+                // Dismount the chicken
+                dismountAllChickens(player, true);
 
-                    // Remove the Glide Feather
-                    ItemStack mainHandItem = player.getInventory().getItemInMainHand();
-                    if (checkAndRemoveFeather(player, mainHandItem)) {
-                        player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
-                    }
+                // Remove the Glide Feather
+                ItemStack mainHandItem = player.getInventory().getItemInMainHand();
+                if (checkAndRemoveFeather(player, mainHandItem)) {
+                    player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
                 }
             }
         }
