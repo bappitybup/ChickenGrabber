@@ -32,6 +32,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.Vector;
+import org.spigotmc.event.entity.EntityDismountEvent;
 
 public class ChickenGrabEvents implements Listener {
 
@@ -173,7 +174,15 @@ public class ChickenGrabEvents implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        checkAndRemoveFeather(event.getPlayer(), event.getPlayer().getInventory().getItemInMainHand());
+        Player player = event.getPlayer();
+        ItemStack mainHandItem = player.getInventory().getItemInMainHand();
+
+        if (checkAndRemoveFeather(player, mainHandItem)) {
+            player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
+        }
+
+        // Dismount the chicken and set AI back to true
+        dismountAllChickens(player, false);
     }
 
     private void giveGlideFeather(Player player) {
@@ -222,6 +231,24 @@ public class ChickenGrabEvents implements Listener {
                         1.0f);
             }
         }
+    }
+
+    @EventHandler
+    public void onEntityDismount(EntityDismountEvent event) {
+        // Check if the dismounted entity is a Chicken
+        if (!(event.getEntity() instanceof Chicken)) {
+            return;
+        }
+
+        // Check if the dismounted vehicle is a Player
+        if (!(event.getDismounted() instanceof Player)) {
+            return;
+        }
+
+        Chicken chicken = (Chicken) event.getEntity();
+
+        // Set the Chicken's AI back to true
+        chicken.setAI(true);
     }
 
     @EventHandler
