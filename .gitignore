@@ -249,6 +249,32 @@ gradle-app.setting
 # Cache of project
 .gradletasknamecache
 
+# Output directories
+target/
+bin/
+
+# Mac OS X files
+.DS_Store
+
+# vim files
+.*.sw[a-z]
+*.un~
+
+# Gradle
+.gradle
+
+# direnv
+.envrc
+
+# Ignore Gradle build output directory
+build
+
+# build plugin jar files
+gradle-server/src/main/resources/*.jar
+
+# Ignore user-specified .tool-versions file (asdf-vm configuration)
+.tool-versions
+
 # # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
 # gradle/wrapper/gradle-wrapper.properties
 
